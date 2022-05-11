@@ -1,0 +1,10 @@
+{
+  "name": "test_css_catcher_001",
+  "id": "1101074448863026644",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "ui": "ui.html"
+}

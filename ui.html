@@ -1,0 +1,92 @@
+<style>
+  div.container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+  }
+  div.container > div.component {
+    height: fit-content;
+    overflow: auto;
+    position: relative !important;
+  }
+</style>
+
+<!-- <h2>Rectangle Creator</h2>
+<p>Count: <input id="count" value="5" /></p>
+<button id="create">Create</button>
+<button id="cancel">Cancel</button> -->
+<h2>Your components</h2>
+<div id="container" class="container"></div>
+<script>
+  const containerTags = ["DIV", "NAV", "UL"];
+  function renderElement(container, ch) {
+    if (ch.nodeName !== "#text") {
+      let child = document.createElement(ch.nodeName);
+      child.title = ch.title;
+      Object.keys(ch.style).forEach(
+        (key) => (child.style[key] = ch.style[key])
+      );
+      if (!containerTags.includes(ch.nodeName)) {
+        child.innerText = ch.innerText;
+        child.textContent = ch.textContent;
+      }
+      if (ch.childNodes.length > 0) {
+        ch.childNodes.forEach((ch) => renderElement(child, ch));
+      }
+      container.appendChild(child);
+    }
+  }
+  function selectElement(element) {
+    parent.postMessage({ pluginMessage: { element } }, "*");
+  }
+</script>
+<script>
+  // document.getElementById("create").onclick = () => {
+  //   const textbox = document.getElementById("count");
+  //   const count = parseInt(textbox.value, 10);
+  //   parent.postMessage(
+  //     { pluginMessage: { type: "create-rectangles", count } },
+  //     "*"
+  //   );
+  // };
+
+  // document.getElementById("cancel").onclick = () => {
+  //   parent.postMessage({ pluginMessage: { type: "cancel" } }, "*");
+  // };
+  let root = document.getElementById("container");
+  fetch("http://localhost:3000/elements", { method: "GET" })
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        data.forEach((el) => {
+          let compContainer = document.createElement("div");
+          compContainer.classList.add("component");
+          let container = document.createElement(el.nodeName);
+          container.title = el.title;
+          Object.keys(el.style).forEach(
+            (key) => (container.style[key] = el.style[key])
+          );
+          // container.style = el.style;
+          if (!containerTags.includes(el.nodeName)) {
+            container.innerText = el.innerText;
+            container.textContent = el.textContent;
+          }
+          if (el.childNodes.length > 0) {
+            el.childNodes.forEach((ch) => {
+              renderElement(container, ch);
+            });
+          }
+          let actionButton = document.createElement("button");
+          actionButton.textContent = "create";
+          actionButton.addEventListener("click", function () {
+            selectElement(el);
+          });
+          compContainer.appendChild(container);
+          compContainer.appendChild(actionButton);
+          root.append(compContainer);
+        });
+      }
+    })
+    .catch((err) => {});
+</script>
