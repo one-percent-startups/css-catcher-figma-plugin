@@ -86,7 +86,15 @@
           compContainer.appendChild(actionButton);
           root.append(compContainer);
         });
+      } else {
+        let no_item = document.createElement("span");
+        no_item.textContent = "No item found";
+        root.append(no_item);
       }
     })
-    .catch((err) => {});
+    .catch((err) => {
+      let no_item = document.createElement("span");
+      no_item.textContent = "No item found";
+      root.append(no_item);
+    });
 </script>
