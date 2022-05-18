@@ -18,6 +18,17 @@
 <button id="cancel">Cancel</button> -->
 <h2>Your components</h2>
 <div id="container" class="container"></div>
+<div class="container">
+  <input type="checkbox" name="close" id="close" checked="" />
+  <label for="close">Close on create</label>
+</div>
+<script>
+  const closeInput = document.getElementById("close");
+  let shouldClose = closeInput.checked;
+  closeInput.addEventListener("click", function (e) {
+    shouldClose = e.target.checked;
+  });
+</script>
 <script>
   const containerTags = ["DIV", "NAV", "UL"];
   function renderElement(container, ch) {
@@ -38,7 +49,7 @@
     }
   }
   function selectElement(element) {
-    parent.postMessage({ pluginMessage: { element } }, "*");
+    parent.postMessage({ pluginMessage: { element, shouldClose } }, "*");
   }
 </script>
 <script>
