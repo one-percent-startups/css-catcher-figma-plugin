@@ -79,23 +79,31 @@ function createFrame(element: Element): FrameNode {
     }
   }
 
-  // if (
-  //   !isNaN(parseInt(element.style.borderWidth)) &&
-  //   parseInt(element.style.borderWidth)
-  // ) {
-  //   el.strokeWeight = parseInt(element.style.borderWidth);
-  //   if (element.style.borderColor !== "transparent") {
-  //     let strokes = clone(el.strokes);
-  //     console.log("strokes", el.strokes, strokes);
-  //     strokes[0].type = "SOLID";
-  //     strokes[0].color.r = 0;
-  //     strokes[0].color.g = 0;
-  //     strokes[0].color.b = 0;
-  //     el.strokes = strokes;
-  //   }
-  // }
+  if (
+    !isNaN(parseInt(element.style.borderWidth)) &&
+    parseInt(element.style.borderWidth)
+  ) {
+    el.strokeWeight = parseInt(element.style.borderWidth);
+    if (
+      element.style.borderColor !== "transparent" ||
+      element.style.borderColor !== "rgba(0,0,0,0)"
+    ) {
+      let borderColor = getColour(element.style.borderColor);
+      let strokes: Paint[] = [
+        {
+          type: "SOLID",
+          opacity: borderColor[3],
+          color: {
+            r: borderColor[0],
+            g: borderColor[1],
+            b: borderColor[2],
+          },
+        },
+      ];
+      el.strokes = strokes;
+    }
+  }
 
-  // console.log("background color", el.fills);
   let background = clone(el.fills);
   if (background) {
     let elBackground = getColour(element.style.backgroundColor);
@@ -106,8 +114,14 @@ function createFrame(element: Element): FrameNode {
     el.fills = background;
   }
 
-  if (!isNaN(parseInt(element.style.borderRadius)))
-    el.cornerRadius = parseInt(element.style.borderRadius);
+  if (!isNaN(parseInt(element.style.borderBottomLeftRadius)))
+    el.bottomLeftRadius = parseInt(element.style.borderBottomLeftRadius);
+  if (!isNaN(parseInt(element.style.borderBottomRightRadius)))
+    el.bottomRightRadius = parseInt(element.style.borderBottomRightRadius);
+  if (!isNaN(parseInt(element.style.borderTopLeftRadius)))
+    el.topLeftRadius = parseInt(element.style.borderTopLeftRadius);
+  if (!isNaN(parseInt(element.style.borderTopRightRadius)))
+    el.topRightRadius = parseInt(element.style.borderTopRightRadius);
 
   if (!isNaN(parseInt(element.style.paddingTop)))
     el.paddingTop = parseInt(element.style.paddingTop);
@@ -146,7 +160,7 @@ function createFrame(element: Element): FrameNode {
   }
   if (element.childNodes.length > 0) {
     for (const ch of element.childNodes) {
-      el.appendChild(createElement(ch));
+      el.appendChild(createElement(ch, element));
     }
   }
   return el;
@@ -158,7 +172,6 @@ function createText(element: Element): TextNode {
   let color = clone(el.fills);
   if (color && "style" in element) {
     let elColor = getColour(element.style.color);
-    console.log(element.textContent, elColor);
     color[0].opacity = elColor[3];
     color[0].color.r = elColor[0];
     color[0].color.g = elColor[1];
@@ -169,13 +182,12 @@ function createText(element: Element): TextNode {
 }
 
 function createElement(
-  element: Element
-  // parent: FrameNode
+  element: Element,
+  parent?: Element
   // start: Position = { x: 0, y: 0 }
 ): SceneNode {
-  // console.log("text contnet", element.textContent);
   if (element.nodeName === "#text") {
-    return createText(element);
+    return createText({ ...element, style: parent.style });
   } else if (element.nodeName === "SPAN") {
     if (
       element.childNodes.length === 1 &&
@@ -192,12 +204,10 @@ function createElement(
 
 figma.ui.onmessage = async (msg) => {
   if ("element" in msg) {
-    console.log(msg.element);
     // nodes = [];
     // await createElement(msg.element);
     await figma.loadFontAsync({ family: "Inter", style: "Regular" });
     figma.currentPage.appendChild(createElement(msg.element));
-    // console.log(nodes);
     // figma.currentPage.selection = nodes;
     // figma.viewport.scrollAndZoomIntoView(nodes);
   }
